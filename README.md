@@ -2,7 +2,7 @@
  Diurnal Energy & Virtual Assistance for navigation : DEVA
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/votre-nom-d-utilisateur/FisheyeIrradianceModel/graphs/commit-activity)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Wolfyann/DEV4n/graphs/commit-activity)
 ![Python Version](https://img.shields.io/badge/python-%3E=3.7-blue)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 
@@ -41,3 +41,5 @@ Planned functionalities include:
 ## DEMO
 
 ![Example on my AllSky Camera](https://github.com/Wolfyann/DEV4n/main/resources/demo.gif)
+
+## Contact
