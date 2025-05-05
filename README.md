@@ -40,6 +40,6 @@ Planned functionalities include:
 
 ## DEMO
 
-![Example on my AllSky Camera](https://github.com/Wolfyann/DEV4n/helpers/resources/demo.jpg)
+![Example on my AllSky Camera](https://github.com/Wolfyann/DEV4n/main/helpers/resources/demo.jpg)
 
 ## Contact
