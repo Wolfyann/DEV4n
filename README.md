@@ -1,5 +1,5 @@
 # DEV4n
- Diurnal Energy & Virtual Assistance for navigation : DEVA
+ Diurnal Energy & Virtual Assistance for navigation : DEVA 'n
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Wolfyann/DEV4n/graphs/commit-activity)
@@ -40,6 +40,6 @@ Planned functionalities include:
 
 ## DEMO
 
-![Example on my AllSky Camera](https://github.com/Wolfyann/DEV4n/helpers/resources/demo.gif)
+![Example on my AllSky Camera](https://github.com/Wolfyann/DEV4n/helpers/resources/demo.jpg)
 
 ## Contact
