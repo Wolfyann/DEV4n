@@ -532,7 +532,7 @@ for i in range(n_steps):
  
     ax3 = plt.subplot(gs[1, 1])
     ax3.grid()
-    wl, spectrum = get_spectral_irradiance_at_max_point(irradiance_map, cos_theta, wavelengths_interp, camera_response_interpolated, atm_data, solar_spectrum_am15)
+    
     line1, = ax3.plot(wavelengths_interp, camera_response_interpolated, linestyle="-.", label="Camera Response", color='blue', linewidth=1)
     line2, = ax3.plot(wavelengths_interp, solar_spectrum_am15, linestyle="--", label="Solar Spectrum AM1.5", color='orange', linewidth=1)
     line3, = ax3.plot(wl, spectrum, linestyle=":", label="Simulated Spectrum", color='red', linewidth=2)
