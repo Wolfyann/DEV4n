@@ -1,6 +1,6 @@
 """
     Sun Irradiance Calculation Module
-    Version: 2025IV29
+    Version: 2025V05
 """
 
 import numpy as np
@@ -77,18 +77,17 @@ except ImportError:
     print("Warning: scipy.spatial.transform not found")
 def build_world_to_camera_matrix(camera_heading_rad, camera_alt_rad, camera_roll_rad):
     """
-    Calcule la matrice de rotation pour passer des coordonnées Monde (X=N, Y=E, Z=Up)
-    aux coordonnées Caméra (X'=droite, Y'=haut, Z'=avant).
+    Computes the rotation matrix to convert from World coordinates (X=N, Y=E, Z=Up)
+    to Camera coordinates (X'=right, Y'=up, Z'=forward).
 
     Args:
-        camera_heading_rad (float): Azimut de visée (radians, 0=N, pi/2=E, anti-horaire).
-        camera_alt_rad (float): Altitude de visée (radians, 0=Horizon, pi/2=Zénith).
-        camera_roll_rad (float): Rouli autour de l'axe de visée Z' (radians).
+        camera_heading_rad (float): Viewing azimuth (radians, 0=N, pi/2=E, counterclockwise).
+        camera_alt_rad (float): Viewing altitude (radians, 0=Horizon, pi/2=Zenith).
+        camera_roll_rad (float): Roll around the viewing axis Z' (radians).
 
     Returns:
-        np.ndarray: Matrices de rotation 3x3 (R_world_to_cam et da transposée).
-    """
-    
+        np.ndarray: 3x3 rotation matrices (R_world_to_cam and its transpose).
+    """    
     z_c_w_z = np.sin(camera_alt_rad)
     proj_xy = np.cos(camera_alt_rad)
 
@@ -254,28 +253,28 @@ def simulate_irradiance_camera_physical_cam(
     resolution=15
 ):
     """
-    Simule une carte d'irradiance dans le repère de la caméra.
+    Simulates an irradiance map in the camera frame.
 
-    La grille de simulation et les calculs sont effectués dans le repère Caméra.
-    La position du soleil est transformée du repère Monde ENU vers le repère Caméra.
+    The simulation grid and calculations are performed in the Camera frame.
+    The position of the sun is transformed from the World ENU frame to the Camera frame.
 
     Args:
-        sun_alt_world_rad (float): Altitude du soleil dans le repère Monde ENU (radians).
-        sun_az_world_rad (float): Azimut du soleil dans le repère Monde ENU (radians).
-        R_world_to_cam (np.ndarray): Matrice de rotation 3x3 du repère Monde ENU vers le repère Caméra.
-        fov_deg (float): Champ de vision total de la caméra en degrés.
-        wavelengths (np.ndarray): Longueurs d'onde pour les calculs spectraux.
-        camera_response (np.ndarray): Réponse spectrale de la caméra.
-        solar_spectrum_am15 (np.ndarray): Spectre solaire (ex: W/m^2/nm).
-        atm_data (dict): Données atmosphériques.
-        resolution (int): Résolution de la grille angulaire dans le repère caméra (resolution x resolution).
+        sun_alt_world_rad (float): Sun altitude in the World ENU frame (radians).
+        sun_az_world_rad (float): Sun azimuth in the World ENU frame (radians).
+        R_world_to_cam (np.ndarray): 3x3 rotation matrix from World ENU to Camera frame.
+        fov_deg (float): Total camera field of view in degrees.
+        wavelengths (np.ndarray): Wavelengths for spectral calculations.
+        camera_response (np.ndarray): Camera spectral response.
+        solar_spectrum_am15 (np.ndarray): Solar spectrum (e.g., W/m^2/nm).
+        atm_data (dict): Atmospheric data.
+        resolution (int): Angular grid resolution in the camera frame (resolution x resolution).
 
     Returns:
         tuple: (irradiance_map, cos_theta_map_flat).
-               irradiance_map est la carte simulée (resolution x resolution), où les axes
-               correspondent aux angles polaires et azimutaux dans le repère Caméra.
-               cos_theta_map_flat est la carte (aplatie) des cosinus de l'angle entre chaque
-               direction du pixel et la direction du soleil (dans le repère Caméra).
+               irradiance_map is the simulated map (resolution x resolution), where axes
+               correspond to polar and azimuthal angles in the Camera frame.
+               cos_theta_map_flat is the (flattened) map of cosines of the angle between each
+               pixel direction and the sun direction (in the Camera frame).
     """
 
     fov_rad = np.radians(fov_deg)
@@ -314,7 +313,7 @@ def simulate_irradiance_camera_physical_cam(
     w_mie = 0.3
     phase_function = w_rayleigh * phase_rayleigh + w_mie * phase_mie
 
-    spectrum_weighted = transmittance_sun[:, np.newaxis] * phase_function[np.newaxis, :]5
+    spectrum_weighted = transmittance_sun[:, np.newaxis] * phase_function[np.newaxis, :]
     weighted_irradiance = np.sum(spectrum_weighted, axis=0) 
     irradiance_map = weighted_irradiance.reshape((resolution, resolution))
 
@@ -322,28 +321,29 @@ def simulate_irradiance_camera_physical_cam(
 
 def fisheye_to_panorama(image, fov_deg=180, output_shape=(90, 360), camera_alt_deg=90):
     """
-    Convertit une image fisheye en image panoramique (equirectangulaire).
+    Converts a fisheye image to a panoramic (equirectangular) image.
 
-    Utilise la projection fisheye équidistante et un mapping altitude/azimut
-    compatible avec le code de calcul de position du soleil fourni, incluant
-    un décalage vertical (altitude) de la caméra.
+    Uses the equidistant fisheye projection and an altitude/azimuth mapping
+    compatible with the sun position calculation code provided, including
+    a vertical offset (altitude) of the camera.
 
-    Optimisé par vectorisation et utilisation de cv2.remap.
+    Optimized by vectorization and use of cv2.remap.
 
     Args:
-        image (np.ndarray): L'image fisheye d'entrée (BGR ou niveaux de gris).
-        fov_deg (float): Le champ de vision total du fisheye en degrés.
-                         (fov_deg / 2.0 est l'angle mappé au rayon max dans le modèle équidistant).
-        output_shape (tuple): La forme (hauteur, largeur) de l'image panoramique de sortie.
-                              Assume mapping: i -> Altitude [90, -90], j -> Azimut [0, 360).
-        camera_alt_deg (float): L'altitude (en degrés dans le repère panoramique)
-                                de l'axe optique de la caméra fisheye. Permet un décalage vertical.
+        image (np.ndarray): Input fisheye image (BGR or grayscale).
+        fov_deg (float): Total fisheye field of view in degrees.
+                         (fov_deg / 2.0 is the angle mapped to the max radius in the equidistant model).
+        output_shape (tuple): Shape (height, width) of the output panoramic image.
+                              Assumes mapping: i -> Altitude [90, -90], j -> Azimuth [0, 360).
+        camera_alt_deg (float): Altitude (in degrees in the panoramic frame)
+                                of the optical axis of the fisheye camera. Allows vertical offset.
 
     Returns:
-        np.ndarray: L'image panoramique de sortie.
+        np.ndarray: The output panoramic image.
     """
+
     if image is None:
-        print("Erreur: L'image d'entrée est vide ou invalide.")
+        print("Empty image provided.")
         return None
 
     height, width = image.shape[:2]
@@ -356,7 +356,7 @@ def fisheye_to_panorama(image, fov_deg=180, output_shape=(90, 360), camera_alt_d
 
     fov_deg_half = fov_deg / 2.0
     if fov_deg_half <= 1e-6:
-         print("Erreur: fov_deg doit être positif.")
+         print("Error: fov_deg must be greater than 0.")
          return np.zeros((alt_steps, az_steps, image.shape[2] if image.ndim == 3 else 1), dtype=image.dtype)
 
     j_grid, i_grid = np.meshgrid(np.arange(az_steps), np.arange(alt_steps))
