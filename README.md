@@ -3,7 +3,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Wolfyann/DEV4n/graphs/commit-activity)
-![Python Version](https://img.shields.io/badge/python-%3E=3.7-blue)
+![Python Version](https://img.shields.io/badge/python-%3E=3.8-blue)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 
  This project aims to develop tools and models for modeling sky irradiance captured by fisheye cameras (Allsky). The aim is to provide a collaborative platform for exploring different methods of projection, distortion correction and irradiance estimation from hemispheric images.
