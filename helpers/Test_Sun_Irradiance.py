@@ -205,9 +205,8 @@ def draw_fisheye_grid(ax, width, height, fov_deg=180, step_deg=15):
         if alt_deg == step_deg:
             ax.text(text_x, text_y, f"{az_deg}°", color='white', fontsize=8, ha='center', va='center', alpha=0.6)
 
-def draw_cardinal_lines_panorama(ax, width=360, height=90, camera_heading=0):
+def draw_cardinal_lines_panorama(ax, width=360, height=90, camera_heading_deg=0):
 
-    camera_heading_deg = np.degrees(camera_heading) 
     cardinal_azimuths = { 
         "N": 0,
         "E": 90,
@@ -378,7 +377,7 @@ def plot_all(
     measured_x = int(image.shape[1] / 2 + r_irradiance * np.cos(phi_irradiance))
     measured_y = int(image.shape[0] / 2 - r_irradiance * np.sin(phi_irradiance))
     if measured_x is not None and measured_y is not None:
-        ax0.plot(measured_x, measured_y, 'ro', markersize=8, label='_Max Irradiance')
+        ax0.plot(measured_x, measured_y, marker='+', markerfacecolor='none', markeredgecolor='red', markersize=8, label='_Max Irradiance')
 
     sun_traj_xy_arr = np.array(sun_traj_xy)
     if sun_traj_xy_arr.size > 0 and sun_traj_xy_arr.ndim == 2 and sun_traj_xy_arr.shape[1] == 2:
@@ -463,7 +462,7 @@ def plot_all(
                 ax1.plot(azimuth_sun_deg_global, altitude_sun_deg, 'yo', markersize=8, label='Soleil (t)')
 
 
-    draw_cardinal_lines_panorama(ax1, width=360, height=90, camera_heading=np.degrees(camera_heading))  # Tracer les lignes cardinales sur la vue panoramique
+    draw_cardinal_lines_panorama(ax1, width=360, height=90, camera_heading_deg=np.degrees(camera_heading))
     draw_world_axes_panorama(ax1, length_deg=25) 
     
     ax1.set_title(f"Panoramic view\n{hour:.2f} h TU")
@@ -509,7 +508,7 @@ def main():
 
     TIME_STEP = 30
     RESOLUTION = 90
-    RESOLUTION_SPECTRAL = 5
+    RESOLUTION_SPECTRAL = 25
 
     parameters = load_parameters("data/dev4n.json")
     latitude = parameters["observer"]["latitude"]
