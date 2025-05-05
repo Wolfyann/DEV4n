@@ -169,7 +169,7 @@ def load_parameters(filepath):
     with open(filepath, "r") as file:
         return json.load(file)
 
-parameters = load_parameters("data/obsbr.json")
+parameters = load_parameters("data/dev4n.json")
 
 latitude = parameters["observer"]["latitude"]
 longitude = parameters["observer"]["longitude"]
@@ -370,9 +370,6 @@ for i in range(n_steps):
 
     blended_fisheye = cv2.addWeighted(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), 0.6, irr_fisheye_resized, 0.4, 0)
 
-    """
-        Vérifier calcul echelle avc la RESOLUTION * 90, 360 !
-    """
     output_shape_panorama =  ((90 * 1//(90 // RESOLUTION)), (360 * 1//(360 // RESOLUTION)))
     alt_steps_pano, az_steps_pano = output_shape_panorama
 
