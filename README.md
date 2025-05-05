@@ -10,14 +10,8 @@
  
  ## Table of contents
 
-* Introduction](#introduction)
+* [Introduction](#introduction)
 * [Features](#features)
-* [Installation](#installation)
-* [Use](#use)
-* [Project structure](#project-structure)
-* [Contribution](#contribution)
-* [License](#license)
-* [Acknowledgements](#acknowledgements)
 * [Contact](#contact)
 
 ## Introduction
