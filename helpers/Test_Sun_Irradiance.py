@@ -305,7 +305,7 @@ def overlay_irradiance_on_fisheye(image, irradiance_map, image_width, image_heig
     return blended_fisheye
 
 def overlay_irradiance_on_panorama(image, irradiance_map, fov, RESOLUTION):
-    output_shape_panorama =  ((90 * 1//(90 // RESOLUTION)), (360 * 1//(360 // RESOLUTION)))
+    output_shape_panorama =  (RESOLUTION , 4 * RESOLUTION )
     alt_steps_pano, az_steps_pano = output_shape_panorama
 
     alt_coords_pano = np.linspace((fov/2), 0, alt_steps_pano)
@@ -346,7 +346,8 @@ def overlay_irradiance_on_panorama(image, irradiance_map, fov, RESOLUTION):
 
 def plot_all(
     i, hour, blended_fisheye, blended_panorama, sun_alt_cam, sun_az_cam, image, image_width, image_height,
-    irradiance_map, sun_traj_xy, vec_cam_array, wl, spectrum, wavelengths_interp, camera_response_interpolated, solar_spectrum_am15, fov=180, camera_heading=0, camera_alt=0, RESOLUTION=90, R_world_to_cam=None
+    irradiance_map, sun_traj_xy, vec_cam_array, wl, spectrum, wavelengths_interp, camera_response_interpolated,
+    solar_spectrum_am15, fov=180, camera_heading=0, camera_alt=0, RESOLUTION=90, R_world_to_cam=None
 ):
     fig = plt.figure(figsize=(20, 8))
     gs = gridspec.GridSpec(2, 2, 
@@ -378,6 +379,13 @@ def plot_all(
     measured_y = int(image.shape[0] / 2 - r_irradiance * np.sin(phi_irradiance))
     if measured_x is not None and measured_y is not None:
         ax0.plot(measured_x, measured_y, marker='+', markerfacecolor='none', markeredgecolor='red', markersize=8, label='_Max Irradiance')
+
+    # --- Compute altitude and azimuth for the irradiance maximum ---
+    theta_max = (max_y_irradiance_map / irradiance_map.shape[0]) * np.pi  # Zenith angle in radians
+    altitude_max_deg = 90 - np.degrees(theta_max)  # Altitude in degrees
+
+    phi_max = (max_x_irradiance_map / irradiance_map.shape[1]) * 2 * np.pi  # Azimuth in radians
+    azimuth_max_deg = (np.degrees(phi_max)) % 360  # Azimuth in degrees
 
     sun_traj_xy_arr = np.array(sun_traj_xy)
     if sun_traj_xy_arr.size > 0 and sun_traj_xy_arr.ndim == 2 and sun_traj_xy_arr.shape[1] == 2:
@@ -421,6 +429,12 @@ def plot_all(
     for az in range(10, 360, 10):  # chaque 30°
         ax1.axvline(az, color='white', linestyle=':', linewidth=0.5)
 
+    # Plot the irradiance maximum as a red cross on the panorama
+    azimuth_max_deg_panorama = (360 - azimuth_max_deg) % 360  # Invert azimuth for panorama
+    if altitude_max_deg > 0:
+        ax1.plot(azimuth_max_deg_panorama, altitude_max_deg, marker='+', markerfacecolor='none', markeredgecolor='red', markersize=8, label='_Max Irradiance')
+        # print(f"Max Irradiance Altitude: {altitude_max_deg:.2f}°, Azimuth: {azimuth_max_deg_panorama:.2f}°")
+
     sun_traj_altaz_pano = []
     center_x, center_y = image_width // 2, image_height // 2
     max_radius = min(center_x, center_y)
@@ -460,7 +474,7 @@ def plot_all(
                 azimuth_sun_deg_global = (azimuth_deg_sun_image + 360) % 360
 
                 ax1.plot(azimuth_sun_deg_global, altitude_sun_deg, 'yo', markersize=8, label='Soleil (t)')
-
+                # print(f"Sun Altitude: {altitude_sun_deg:.2f}°, Azimuth: {azimuth_sun_deg_global:.2f}°")
 
     draw_cardinal_lines_panorama(ax1, width=360, height=90, camera_heading_deg=np.degrees(camera_heading))
     draw_world_axes_panorama(ax1, length_deg=25) 
@@ -507,8 +521,8 @@ def main():
     # === PARAMETERS ===
 
     TIME_STEP = 30
-    RESOLUTION = 90
-    RESOLUTION_SPECTRAL = 25
+    RESOLUTION = 15 #720     # Low : 15 or degrees by pixel: 90 = 1 degree/pixel
+    RESOLUTION_SPECTRAL = 5 # nanometers in stepping for the spectral response
 
     parameters = load_parameters("data/dev4n.json")
     latitude = parameters["observer"]["latitude"]
