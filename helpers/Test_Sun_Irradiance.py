@@ -298,14 +298,16 @@ def overlay_irradiance_on_fisheye(image, irradiance_map, image_width, image_heig
 
     irr_fisheye_colormap = cv2.applyColorMap(irr_fisheye_uint8, cv2.COLORMAP_JET)
     irr_fisheye_colormap_rgb = cv2.cvtColor(irr_fisheye_colormap, cv2.COLOR_BGR2RGB)
-    irr_fisheye_resized = irr_fisheye_colormap_rgb
-
+    if irr_fisheye_colormap_rgb.shape[:2] != image.shape[:2]:
+        irr_fisheye_resized = cv2.resize(irr_fisheye_colormap_rgb, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_CUBIC)
+    else:
+        irr_fisheye_resized = irr_fisheye_colormap_rgb
     blended_fisheye = cv2.addWeighted(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), 0.6, irr_fisheye_resized, 0.4, 0)
 
     return blended_fisheye
 
 def overlay_irradiance_on_panorama(image, irradiance_map, fov, RESOLUTION):
-    output_shape_panorama =  (RESOLUTION , 4 * RESOLUTION )
+    output_shape_panorama =  (RESOLUTION , 8 * RESOLUTION )
     alt_steps_pano, az_steps_pano = output_shape_panorama
 
     alt_coords_pano = np.linspace((fov/2), 0, alt_steps_pano)
@@ -370,7 +372,7 @@ def plot_all(
 
     x_sun_fish, y_sun_fish = fisheye_projection_equidistant(sun_alt_cam, sun_az_cam, image_width, image_height, fov, np.eye(3))
     if x_sun_fish is not None and y_sun_fish is not None:
-        ax0.plot(x_sun_fish, y_sun_fish, 'yo', markersize=8, label='Soleil')
+        ax0.plot(x_sun_fish, y_sun_fish, 'yo', markersize=10, label='Soleil')
 
     max_y_irradiance_map, max_x_irradiance_map = np.unravel_index(np.argmax(irradiance_map), irradiance_map.shape)
     r_irradiance = (min(image.shape[1], image.shape[0]) / 2) * (max_y_irradiance_map / irradiance_map.shape[0])
@@ -519,9 +521,8 @@ def plot_all(
 
 def main():
     # === PARAMETERS ===
-
     TIME_STEP = 30
-    RESOLUTION = 15 #720     # Low : 15 or degrees by pixel: 90 = 1 degree/pixel
+    RESOLUTION =  360     # Low : 15 or degrees by pixel: 90 = 1 degree/pixel 720 = 0.25 degree/pixel
     RESOLUTION_SPECTRAL = 5 # nanometers in stepping for the spectral response
 
     parameters = load_parameters("data/dev4n.json")
@@ -531,26 +532,31 @@ def main():
     camera_data = parameters["camera"]
     image_width, image_height = camera_data["resolution"]
     location = EarthLocation.from_geodetic(lat=latitude * u.deg, lon=longitude * u.deg, height=altitude * u.m)
-    date = datetime(2022, 7, 27)
+    date = datetime(2025, 7, 15)
     start_hour = 4
-    end_hour = 19
+    end_hour = 20
  
     n_steps = ((end_hour - start_hour) * 60 // TIME_STEP)
+    print(f"{n_steps} images will be generated.")
 
     image = np.zeros((image_height, image_width, 3), dtype=np.uint8)
-    loaded_image = cv2.imread("data/skyMapAnonym.jpg")
+    loaded_image = cv2.imread("data/skyMap.jpg")
     if loaded_image is not None:
         image = loaded_image
         image_height, image_width = loaded_image.shape[:2]
+    
+    # Central azimuth and altitude of the camera
     camera_heading = np.radians(camera_data.get("camera_heading", 0))
     camera_alt = np.radians(camera_data.get("camera_alt", 90))
     camera_alt = (np.pi/2 - np.deg2rad(camera_alt)) 
     camera_roll = np.radians(camera_data.get("camera_roll", 0))
+    
     pixel_size_x = camera_data["pixel_size_X"]
     focal_length = parameters["optics"]["focal_length"]
     
-    # fov = 2 * np.degrees(np.arctan((pixel_size_x * image_width) / (2 * focal_length)))
-    fov = 180
+    fov = 2 * np.degrees(np.arctan((pixel_size_x * image_width) / (2 * focal_length)))
+    print(f"FOV: {fov:.2f} degrees")
+    if fov < 180: fov = 200
     
     atm_data = parameters["atmosphere"]
     wavelengths_interp, camera_response_interpolated = interpolate_camera_response(camera_data, RESOLUTION_SPECTRAL)

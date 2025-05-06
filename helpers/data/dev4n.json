@@ -28,7 +28,7 @@
       "altitude": 120
     },
     "optics": {
-      "focal_length": 1.876,
+      "focal_length": 0.876,
       "distortion_coefficients": [0.01, -0.0003, 0.0, 0.0]
     },
     "atmosphere": {
