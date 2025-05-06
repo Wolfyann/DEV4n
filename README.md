@@ -44,5 +44,5 @@ Planned functionalities include:
 
 ## Contact
 
-![look on Discussion](https://github.com/Wolfyann/DEV4n/discussions)
+![Look on Discussion](https://github.com/Wolfyann/DEV4n/discussions)
 
