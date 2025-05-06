@@ -43,3 +43,6 @@ Planned functionalities include:
 ![Example on my AllSky Camera](https://github.com/Wolfyann/DEV4n/blob/main/helpers/resources/demo.gif)
 
 ## Contact
+
+![look on Discussion](https://github.com/Wolfyann/DEV4n/discussions)
+
