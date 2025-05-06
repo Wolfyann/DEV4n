@@ -24,7 +24,7 @@
     },
     "observer":{
       "latitude": 48.8351933259 ,
-      "longitude": 2.33523532572
+      "longitude": 2.33523532572,
       "altitude": 120
     },
     "optics": {
@@ -262,4 +262,3 @@
       "horizon_mask": 0.01
     }
   }
-  

@@ -549,8 +549,8 @@ def main():
     pixel_size_x = camera_data["pixel_size_X"]
     focal_length = parameters["optics"]["focal_length"]
     
-    # fov = 2 * np.degrees(np.arctan((pixel_size_x * image_width) / (2 * focal_length)))
-    fov = 180
+    fov = 2 * np.degrees(np.arctan((pixel_size_x * image_width) / (2 * focal_length)))
+    # fov = 180
     
     atm_data = parameters["atmosphere"]
     wavelengths_interp, camera_response_interpolated = interpolate_camera_response(camera_data, RESOLUTION_SPECTRAL)
